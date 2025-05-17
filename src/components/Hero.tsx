@@ -1,6 +1,29 @@
 
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import SpinningLogo from "./Cube3D";
+import FallbackLogo from "./FallbackLogo";
+
+// Dynamic import to handle potential loading failures
+const SpinningLogoWithErrorBoundary = () => {
+  const [Component, setComponent] = useState<React.ComponentType<any> | null>(null);
+  const [error, setError] = useState(false);
+  
+  useEffect(() => {
+    import('./Cube3D')
+      .then((module) => {
+        setComponent(() => module.default);
+      })
+      .catch((err) => {
+        console.error("Failed to load 3D component:", err);
+        setError(true);
+      });
+  }, []);
+  
+  if (error) return <FallbackLogo />;
+  if (!Component) return <div className="animate-pulse h-full w-full bg-neext-dark rounded-xl"></div>;
+  
+  return <Component />;
+};
 
 const Hero = () => {
   return (
@@ -40,7 +63,7 @@ const Hero = () => {
           </div>
 
           <div className="lg:w-1/2 animate-float">
-            <SpinningLogo height="400px" width="100%" className="animate-pulse-slow" />
+            <SpinningLogoWithErrorBoundary />
           </div>
         </div>
       </div>
